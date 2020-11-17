@@ -15,7 +15,7 @@ public class MapGraph :IPercourable
         this.openList.Add(start);
 
         
-        float gScore = 0;
+        
         Dictionary < Node,float> hScores = new Dictionary<Node, float>();
         Dictionary < Node,float> gScores = new Dictionary<Node, float>();
         Dictionary < Node,float> fScores = new Dictionary<Node, float>();
@@ -130,9 +130,9 @@ public class MapGraph :IPercourable
         return path;
     }
 
-    private float heuristic(float dx, float dy)
+    private float heuristic(float dx, float dy,float dz = 0)
     {
-       return Mathf.Sqrt(dx * dx + dy * dy);
+       return Mathf.Sqrt(dx * dx + dy * dy + dz * dz);
     }
     public Node getGraphNode(Node node)
     {

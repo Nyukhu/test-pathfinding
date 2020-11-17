@@ -5,79 +5,68 @@ using UnityEngine;
 public class testGraph : MonoBehaviour
 {
     // Start is called before the first frame update
+    public GameObject map;
     void Start()
     {
-        Node nodeA1 = new Node("a1", 0, 0, 1);
-        Node nodeA2 = new Node("a2", 0, 1, 1);
-        Node nodeA3 = new Node("a3", 0, 2, 1);
-       
-        Node nodeB1 = new Node("b1", 1, 0, 1);
-        Node nodeB2 = new Node("b2", 1, 1, 999);
-        Node nodeB3 = new Node("b3", 1, 2, 1);
-       
-        Node nodeC1 = new Node("c1", 2, 0, 1);
-        Node nodeC2 = new Node("c2", 2, 1, 1);
-        Node nodeC3 = new Node("c3", 2, 2, 1);
-        
-        Node nodeD1 = new Node("d1", 3, 0, 1);
-        Node nodeD2 = new Node("d2", 3, 1, 1);
-        Node nodeD3 = new Node("d3", 3, 2, 1);
-       
-        Node nodeE1 = new Node("e1", 4, 0, 1);
-        Node nodeE2 = new Node("e2", 4, 1, 1);
-        Node nodeE3 = new Node("e3", 4, 2, 1);
-        
+        List<GameObject> spawnedItems = new List<GameObject>();
+        GraphBuilder graphBuilder = new GraphBuilder();
 
-        nodeA1.neighbours.Add(nodeA2);
-        nodeA1.neighbours.Add(nodeB1);
 
-        nodeA2.neighbours.Add(nodeA1);
-        nodeA2.neighbours.Add(nodeA3);
-        nodeA2.neighbours.Add(nodeB2);
+        List<Node> graph2D = graphBuilder.createGraphFrom2DSquareMap(map);
 
-        nodeA3.neighbours.Add(nodeA2);
-        nodeA3.neighbours.Add(nodeB3);
+        MapGraph newMapGraph = new MapGraph();
 
-        nodeB1.neighbours.Add(nodeA1);
-        nodeB1.neighbours.Add(nodeB2);
-        nodeB1.neighbours.Add(nodeC1);
+        newMapGraph.graph = graph2D;
 
-        nodeB2.neighbours.Add(nodeA2);
-        nodeB2.neighbours.Add(nodeB1);
-        nodeB2.neighbours.Add(nodeB3);
-        nodeB2.neighbours.Add(nodeC2);
+        graph2D.ForEach(node =>
+        {
+            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.transform.position = new Vector3(node.x, node.z, node.y);
+            if (node.cost > 900)
+            {
+                cube.GetComponent<MeshRenderer>().material.color = Color.black;
+            }
+            var cubeSize = transform.localScale;
+            cubeSize.x = 0.8f;
+            cubeSize.y = 0.1f;
+            cubeSize.z = 0.8f;
+            cube.transform.localScale = cubeSize;
+            spawnedItems.Add(cube);
 
-        nodeB3.neighbours.Add(nodeA3);
-        nodeB3.neighbours.Add(nodeB2);
-        nodeB3.neighbours.Add(nodeC3);
-
-        nodeC1.neighbours.Add(nodeC2);
-        nodeC1.neighbours.Add(nodeB1);
-
-        nodeC2.neighbours.Add(nodeC1);
-        nodeC2.neighbours.Add(nodeC3);
-        nodeC2.neighbours.Add(nodeB2);
-
-        nodeC3.neighbours.Add(nodeC2);
-        nodeC3.neighbours.Add(nodeB3);
-
-        MapGraph graph = new MapGraph();
-        graph.graph.Add(nodeA1);
-        graph.graph.Add(nodeA2);
-        graph.graph.Add(nodeA3);
-        graph.graph.Add(nodeB1);
-        graph.graph.Add(nodeB2);
-        graph.graph.Add(nodeB3);
-        graph.graph.Add(nodeC1);
-        graph.graph.Add(nodeC2);
-        graph.graph.Add(nodeC3);
-
-        List<Node> path = graph.shortestPath(nodeA2, nodeC3);
+        });
+        Node start = newMapGraph.graph[0];
+        Node end = newMapGraph.graph[53];
+        List<Node> path = newMapGraph.shortestPath(start, end);
+        Debug.Log("neighbour : " + newMapGraph.graph[0].neighbours[0].name);
+        Debug.Log(newMapGraph.graph[10].name);
         path.ForEach(node =>
         {
             Debug.Log("tile " + node.name );
+            GameObject correspondingCube = spawnedItems.Find(cube =>
+            {
+                Debug.Log("compare : " + Mathf.Round(cube.transform.position.x * 100f));
+                Debug.Log("compare to : " + Mathf.Round(node.x * 100f));
+                if (Mathf.Round(cube.transform.position.x * 100f) == Mathf.Round(node.x * 100f) && Mathf.Round(cube.transform.position.z * 100f) == Mathf.Round(node.y * 100f))
+                {
+                    return true;
+                }
+                return false;
+            });
+            if(correspondingCube != null)
+            {
+                if(node == start || node == end)
+                {
+                    correspondingCube.GetComponent<MeshRenderer>().material.color = Color.green;
 
+                }
+                else
+                {
+                    correspondingCube.GetComponent<MeshRenderer>().material.color = Color.red;
+                }
+            }
         });
+
+        
     }
 
     // Update is called once per frame
